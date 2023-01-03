@@ -1,0 +1,1 @@
+# React application to test Vite
