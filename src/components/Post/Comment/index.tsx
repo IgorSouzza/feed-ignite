@@ -6,9 +6,14 @@ import { Avatar } from '../../Avatar';
 
 type CommentProps = {
   content: string;
+  onDeleteComment: (comment: string) => void;
 }
 
-export function Comment({ content }: CommentProps) {
+export function Comment({ content, onDeleteComment }: CommentProps) {
+  function handleDeleteComment() {
+    onDeleteComment(content)
+  }
+
   return (
     <div className={styles.comment}>
       <Avatar src="https://thispersondoesnotexist.com/image" hasBorder={false} />
@@ -20,7 +25,7 @@ export function Comment({ content }: CommentProps) {
               <strong>Igor Souza</strong>
               <time title="01 de Janeiro às 19h40" dateTime="2023-01-03 19:40:30">Cerca de 1h atrás</time>
             </div>
-            <button title="Deletar comentário">
+            <button title="Deletar comentário" onClick={handleDeleteComment}>
               <Trash size={24} />
             </button>
           </header>
