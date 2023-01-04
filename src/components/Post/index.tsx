@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { format, formatDistanceToNow } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 
@@ -15,6 +16,9 @@ type PostProps = {
 }
 
 export function Post({ author, content, publishedAt }: PostProps) {
+  const [comments, setComments] = useState<string[]>([]);
+  const [newCommentText, setNewCommentText] = useState('');
+
   const formattedPublishedDate = format(publishedAt, "dd 'de' LLLL 'às' HH'h'mm", 
     { locale: ptBR },
   );
@@ -25,12 +29,22 @@ export function Post({ author, content, publishedAt }: PostProps) {
   });
 
   const contentHTML = {
-    paragraph: (line: Content) => <p>{line.content}</p>,
+    paragraph: (line: Content) => <p key={line.content}>{line.content}</p>,
     link: (line: Content) => (
-      <p>
+      <p key={line.content}>
         <a href={line.url} target="_blank">{line.content}</a>
       </p>
     ),
+  }
+
+  function handleAddComment(e: React.SyntheticEvent) {
+    e.preventDefault();
+    setComments([...comments, newCommentText]);
+    setNewCommentText('')
+  }
+
+  function handleNewCommentChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    setNewCommentText(e.target.value)
   }
 
   return (
@@ -52,18 +66,21 @@ export function Post({ author, content, publishedAt }: PostProps) {
         {content.map((line) => contentHTML[line.type](line))}
       </div>
 
-      <form className={styles.commentForm}>
+      <form onSubmit={handleAddComment} className={styles.commentForm}>
         <strong>Deixe seu feedback</strong>
-        <textarea placeholder='Deixe um comentário' />
+        <textarea 
+          name="comment"
+          placeholder='Deixe um comentário'
+          value={newCommentText}
+          onChange={handleNewCommentChange}
+        />
         <footer>
           <button type='submit'>Publicar</button>
         </footer>
       </form>
 
       <div className={styles.commentList}>
-        <Comment />
-        <Comment />
-        <Comment />
+        {comments.map((comment) => <Comment key={comment} content={comment} />)}
       </div>
     </article>
   )
