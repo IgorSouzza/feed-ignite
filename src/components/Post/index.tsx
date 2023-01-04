@@ -1,31 +1,55 @@
+import { format, formatDistanceToNow } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
+
 import styles from './Post.module.css';
 
 import { Avatar } from '../Avatar';
-import { Comment } from './Comment'
+import { Comment } from './Comment';
 
-export function Post() {
+import { Author, Content } from '../../data/posts'
+
+type PostProps = {
+  author: Author;
+  content: Content[];
+  publishedAt: Date;
+}
+
+export function Post({ author, content, publishedAt }: PostProps) {
+  const formattedPublishedDate = format(publishedAt, "dd 'de' LLLL 'às' HH'h'mm", 
+    { locale: ptBR },
+  );
+  
+  const publishedDateRelativeToNow = formatDistanceToNow(publishedAt, {
+    locale: ptBR,
+    addSuffix: true,
+  });
+
+  const contentHTML = {
+    paragraph: (line: Content) => <p>{line.content}</p>,
+    link: (line: Content) => (
+      <p>
+        <a href={line.url} target="_blank">{line.content}</a>
+      </p>
+    ),
+  }
+
   return (
     <article className={styles.post}>
       <header>
         <div className={styles.author}>
-          <Avatar src="https://github.com/igorSouzza.png" />
+          <Avatar src={author.avatarUrl} />
           <div className={styles.authorInfo}>
-            <strong>Igor Souza</strong>
-            <span>Web Developer</span>
+            <strong>{author.name}</strong>
+            <span>{author.role}</span>
           </div>
         </div>
-        <time title="01 de Janeiro às 19h40" dateTime="2023-01-03 19:40:30">Publicado há 1h</time>
+        <time title={formattedPublishedDate} dateTime={publishedAt.toISOString()}>
+          Publicado {publishedDateRelativeToNow}
+        </time>
       </header>
 
       <div className={styles.content}>
-        <p>Lorem ipsum 👋</p>
-        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Unde magni autem consectetur reiciendis est asperiores at eaque culpa itaque. Voluptatum laborum sunt exercitationem aliquam similique illum ex fugit a iste.</p>
-        <p>👉 <a href="" target="_blank">jane.design/doctorcare</a></p>
-        <p>
-          <a href="" target="_blank">#test {" "}</a>
-          <a href="" target="_blank">#post {" "}</a>
-          <a href="" target="_blank">#ignite</a>
-        </p>
+        {content.map((line) => contentHTML[line.type](line))}
       </div>
 
       <form className={styles.commentForm}>
